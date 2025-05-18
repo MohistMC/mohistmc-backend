@@ -17,38 +17,3 @@ This is the backend for MohistMC's website.
 ```bash
 $ docker compose up -d
 ```
-
-```bash
-$ pnpm install
-```
-
-## Compile and run the project
-
-```bash
-# dev mode
-$ pnpm run start:dev
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Run in production mode
-
-Set the `NODE_ENV` environment variable to `production` and run the following command:
-```bash
-$ docker compose up -d
-```
-
-## License
-
-Nest is [GPL-3.0 licensed](LICENSE).
