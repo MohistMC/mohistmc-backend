@@ -1,19 +1,26 @@
 <div align="center">
-  <h1 align="center">Tomuss Grade API</h1>
+  <h1 align="center">MohistMC REST API</h1>
 
 ### Backend for MohistMC's website
-![NodeJS](https://img.shields.io/badge/node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
-![Typescript](https://img.shields.io/badge/typescript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![NestJS](https://img.shields.io/badge/nest-black?style=for-the-badge&logo=nestjs&logoColor=white)
-![MikroORM](https://img.shields.io/badge/mikroorm-FF6F61?style=for-the-badge&logo=typeorm&logoColor=white)
+![Java](https://img.shields.io/badge/java-007ACC?style=for-the-badge&logo=java&logoColor=white)
+![SpringBoot](https://img.shields.io/badge/springboot-43853D?style=for-the-badge&logo=springboot&logoColor=white)
 </div>
 
 ## About
 
-This is the backend for MohistMC's website.     
+This is the rest api for MohistMC's website.     
 
 ## Project setup
 
+Clone the repository and open it in your favorite IDE (IntelliJ IDEA is recommended).       
+
+Copy the `.env.dist` file to `.env` and fill in the values.
+
+## Running the project
+
+Run the postgres database (will use credentials from `.env` file):
 ```bash
 $ docker compose up -d
 ```
+
+Then, start the app using your IDE.
