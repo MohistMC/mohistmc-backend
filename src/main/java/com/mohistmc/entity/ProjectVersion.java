@@ -3,6 +3,7 @@ package com.mohistmc.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -26,4 +27,9 @@ public class ProjectVersion {
 
     @Column(name = "git_branch", length = Integer.MAX_VALUE)
     private String gitBranch;
+
+    @ColumnDefault("true")
+    @Column(name = "active")
+    private Boolean active = true;
+
 }

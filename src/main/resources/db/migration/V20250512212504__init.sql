@@ -17,20 +17,22 @@ on table project is 'Project table';
 alter table project
     owner to mohistmc;
 
-CREATE TABLE git_commit (
-                            id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                            git_sha TEXT NOT NULL,
-                            git_commit_message TEXT NOT NULL,
-                            git_commit_author TEXT NOT NULL,
-                            git_commit_email TEXT,
-                            git_commit_date TIMESTAMP NOT NULL,
-                            project_id INTEGER
-                                CONSTRAINT fk_project
-                                    REFERENCES project
-                                    ON DELETE CASCADE
+CREATE TABLE git_commit
+(
+    id                 INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    git_sha            TEXT      NOT NULL,
+    git_commit_message TEXT      NOT NULL,
+    git_commit_author  TEXT      NOT NULL,
+    git_commit_email   TEXT,
+    git_commit_date    TIMESTAMP NOT NULL,
+    project_id         INTEGER
+        CONSTRAINT fk_project
+            REFERENCES project
+            ON DELETE CASCADE
 );
 
-COMMENT ON TABLE git_commit IS 'Git commit information';
+COMMENT
+ON TABLE git_commit IS 'Git commit information';
 
 ALTER TABLE git_commit
     OWNER TO mohistmc;
@@ -54,34 +56,6 @@ on table project_version is 'Versions list associated to a project';
 alter table project_version
     owner to mohistmc;
 
--- Modification de la table build
-DROP TABLE IF EXISTS build CASCADE;
-
-CREATE TABLE build
-(
-    id                  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    project_version_id  INTEGER
-        CONSTRAINT fk_project_version
-            REFERENCES project_version
-            ON DELETE CASCADE,
-    artifact_id         BIGINT,
-    workflow_run_id     BIGINT,
-    artifact_downloaded BOOLEAN DEFAULT FALSE,
-    git_info            INTEGER
-        CONSTRAINT fk_git_commit
-            REFERENCES git_commit(id)
-            ON DELETE SET NULL,
-    file_sha256         TEXT,
-    built_on            TIMESTAMP,
-    active              BOOLEAN DEFAULT TRUE,
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-);
-
-COMMENT ON TABLE build IS 'Project builds';
-
-ALTER TABLE build
-    OWNER TO mohistmc;
 
 create table loader_version
 (
@@ -97,3 +71,37 @@ on table loader_version is 'Forge/NeoForge/Fabric loader version';
 
 alter table loader_version
     owner to mohistmc;
+
+-- Modification de la table build
+DROP TABLE IF EXISTS build CASCADE;
+
+CREATE TABLE build
+(
+    id                  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    project_version_id  INTEGER
+        CONSTRAINT fk_project_version
+            REFERENCES project_version
+            ON DELETE CASCADE,
+    artifact_id         BIGINT,
+    workflow_run_id     BIGINT,
+    artifact_downloaded BOOLEAN   DEFAULT FALSE,
+    git_info            INTEGER
+        CONSTRAINT fk_git_commit
+            REFERENCES git_commit (id)
+            ON DELETE SET NULL,
+    loader_version_id   INTEGER
+        CONSTRAINT fk_loader_version
+            REFERENCES loader_version (id)
+            ON DELETE SET NULL,
+    file_sha256         TEXT,
+    built_on            TIMESTAMP,
+    active              BOOLEAN   DEFAULT TRUE,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT
+ON TABLE build IS 'Project builds';
+
+ALTER TABLE build
+    OWNER TO mohistmc;

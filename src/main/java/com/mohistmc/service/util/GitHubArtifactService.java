@@ -1,12 +1,10 @@
-package com.mohistmc.service;
+package com.mohistmc.service.util;
 
 import com.mohistmc.config.properties.FolderProperties;
 import com.mohistmc.config.properties.GithubProperties;
 import com.mohistmc.dto.WorkflowRunWithArtifacts;
-import com.mohistmc.entity.Build;
 import com.mohistmc.entity.GitCommit;
-import com.mohistmc.entity.Project;
-import com.mohistmc.entity.ProjectVersion;
+import com.mohistmc.entity.*;
 import com.mohistmc.enums.GitPlatformEnum;
 import com.mohistmc.repository.BuildRepository;
 import com.mohistmc.repository.GitCommitRepository;
@@ -32,6 +30,8 @@ public class GitHubArtifactService {
     private final BuildRepository buildRepository;
     private final GitCommitRepository gitCommitRepository;
 
+    private final LoaderVersionParserService loaderVersionParserService;
+
     private final GithubProperties githubProperties;
     private final FolderProperties folderProperties;
 
@@ -56,6 +56,9 @@ public class GitHubArtifactService {
         log.info("Downloading previously failed artifacts downloads for project: {}", project.getName());
         downloadPreviouslyFailedDownloads(repo);
 
+        log.info("Searching for project loaders version to update: {}", project.getName());
+        searchForLoaderVersionToUpdate(project);
+
         log.info("Synchronizing project: {}", project.getName());
         project.getProjectVersions().forEach(version -> saveBuildsForVersion(project, version, repo));
     }
@@ -77,7 +80,7 @@ public class GitHubArtifactService {
     }
 
     private void downloadPreviouslyFailedDownloads(GHRepository repository) {
-        List<Build> builds = buildRepository.findAllByArtifactDownloadedIsFalse();
+        List<Build> builds = buildRepository.findAllByArtifactDownloadedIsFalseAndActiveIsTrue();
 
         for (Build build : builds) {
             try {
@@ -94,6 +97,21 @@ public class GitHubArtifactService {
             }
         }
         builds.forEach(this::downloadArtifactAndSaveHash);
+    }
+
+    private void searchForLoaderVersionToUpdate(Project project) {
+        List<Build> buildsToUpdate = buildRepository.findAllByLoaderVersionNullAndProjectVersion_Project(project).stream().map(build -> {
+            String forgeVersion = loaderVersionParserService.parseForgeVersion(build);
+            String neoForgeVersion = loaderVersionParserService.parseNeoForgeVersion(build);
+            String fabricVersion = loaderVersionParserService.parseFabricVersion(build);
+
+            return build.setLoaderVersion(new LoaderVersion()
+                    .setForgeVersion(forgeVersion)
+                    .setNeoforgeVersion(neoForgeVersion)
+                    .setFabricVersion(fabricVersion)
+            );
+        }).toList();
+        buildRepository.saveAll(buildsToUpdate);
     }
 
     private void downloadArtifactAndSaveHash(Build build) {

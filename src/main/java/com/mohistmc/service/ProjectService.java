@@ -25,6 +25,6 @@ public class ProjectService {
     }
 
     public List<ProjectVersionDto> getProjectVersions(String projectName) {
-        return projectVersionRepository.findAllByProject_Name(projectName).stream().map(projectVersionMapper::toDto).toList();
+        return projectVersionRepository.findAllByProject_NameAndActiveIsTrueAndProject_ActiveIsTrue(projectName).stream().map(projectVersionMapper::toDto).toList();
     }
 }

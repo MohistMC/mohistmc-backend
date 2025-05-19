@@ -1,10 +1,15 @@
 package com.mohistmc.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.time.Instant;
 
 /**
  * DTO for {@link com.mohistmc.entity.GitCommit}
  */
-public record GitCommitDto(String gitSha, String gitCommitMessage, String gitCommitAuthor, Instant gitCommitDate) implements Serializable {
-  }
+public record GitCommitDto(@JsonProperty("hash") String gitSha,
+                           @JsonProperty("changelog") String gitCommitMessage,
+                           @JsonProperty("author") String gitCommitAuthor,
+                           @JsonProperty("commited_at") Instant gitCommitDate) implements Serializable {
+}

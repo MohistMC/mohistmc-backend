@@ -1,6 +1,8 @@
 package com.mohistmc.repository;
 
 import com.mohistmc.entity.Build;
+import com.mohistmc.entity.Project;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,7 +12,17 @@ public interface BuildRepository extends JpaRepository<Build, Integer> {
     @Query("SELECT b.workflowRunId FROM Build b WHERE b.projectVersion.id = ?1")
     List<Long> findAllWorkflowRunsIds(Integer projectVersionId);
 
-    List<Build> findAllByArtifactDownloadedIsFalse();
+    List<Build> findAllByArtifactDownloadedIsFalseAndActiveIsTrue();
 
-    List<Build> findAllByProjectVersion_ProjectNameAndProjectVersion_VersionName(String projectName, String versionName);
+    @Query("""
+            SELECT b FROM Build b
+            JOIN FETCH b.projectVersion pv
+            JOIN FETCH pv.project p
+            WHERE b.active = true AND b.artifactDownloaded = true AND pv.active = true AND p.active = true
+            AND p.name = ?1 AND pv.versionName = ?2
+            """)
+    List<Build> findAllByProjectAndVersion(String projectName, String versionName);
+
+    @EntityGraph(attributePaths = {"projectVersion", "projectVersion.project", "loaderVersion", "gitInfo"})
+    List<Build> findAllByLoaderVersionNullAndProjectVersion_Project(Project projectVersionProject);
 }

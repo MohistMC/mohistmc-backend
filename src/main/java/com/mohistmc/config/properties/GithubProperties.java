@@ -16,19 +16,19 @@ public class GithubProperties {
     @Value("${github.token}")
     private String token;
 
-    public GitHub connect() {
-        try {
-            return GitHub.connect(username, token);
-        } catch (Exception e) {
-            return connectAnonymously();
-        }
-    }
-
     private static GitHub connectAnonymously() {
         try {
             return GitHub.connectAnonymously();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    public GitHub connect() {
+        try {
+            return GitHub.connect(username, token);
+        } catch (Exception e) {
+            return connectAnonymously();
         }
     }
 }

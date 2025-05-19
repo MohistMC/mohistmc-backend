@@ -4,6 +4,7 @@ import com.mohistmc.enums.GitPlatformEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -33,5 +34,9 @@ public class Project {
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     private Set<ProjectVersion> projectVersions = new LinkedHashSet<>();
+
+    @ColumnDefault("true")
+    @Column(name = "active")
+    private Boolean active = true;
 
 }

@@ -20,7 +20,7 @@ public class BuildService {
     private final FolderProperties folderProperties;
 
     public List<Build> getBuildsByProjectAndVersion(String projectName, String versionName) {
-        return buildRepository.findAllByProjectVersion_ProjectNameAndProjectVersion_VersionName(projectName, versionName);
+        return buildRepository.findAllByProjectAndVersion(projectName, versionName);
     }
 
     public Build getBuildById(Integer buildId) {
@@ -28,7 +28,7 @@ public class BuildService {
     }
 
     public Build getLatestBuild(String projectName, String versionName) {
-        return buildRepository.findAllByProjectVersion_ProjectNameAndProjectVersion_VersionName(projectName, versionName)
+        return buildRepository.findAllByProjectAndVersion(projectName, versionName)
                 .stream()
                 .max(Comparator.comparing(Build::getCreatedAt))
                 .orElseThrow(() -> new RuntimeException("No builds found"));

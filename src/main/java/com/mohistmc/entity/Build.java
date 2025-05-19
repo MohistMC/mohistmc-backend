@@ -55,12 +55,17 @@ public class Build {
     @Column(name = "artifact_downloaded")
     private Boolean artifactDownloaded = false;
 
-    private transient GHArtifact ghArtifact;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "git_info")
     private GitCommit gitInfo;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "loader_version_id")
+    private LoaderVersion loaderVersion;
+
+    private transient GHArtifact ghArtifact;
 
     public String getFileName() {
         return MessageFormat.format("{0}-{1}-{2}.jar", projectVersion.getProject().getName(), projectVersion.getVersionName(), gitInfo.getGitSha().substring(0, 7));
