@@ -1,0 +1,6 @@
+FROM postgres:latest
+
+ENV POSTGRES_DB=mohistmc_website
+ENV POSTGRES_USER=mohistmc
+
+WORKDIR /var/lib/postgresql/data
