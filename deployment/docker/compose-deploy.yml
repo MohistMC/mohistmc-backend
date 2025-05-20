@@ -23,8 +23,9 @@ services:
     container_name: mohistmc-backend-v3-${ENV}
     restart: always
     environment:
+      DB_HOST: mohistmc-db-v3-${ENV}
+      DB_NAME: mohistmc_website
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_URL: jdbc:postgresql://mohistmc-db-v3-${ENV}/mohistmc_website
       GITHUB_TOKEN: ${CREDENTIALS_GITHUB_TOKEN}
       GITHUB_USERNAME: ${CREDENTIALS_GITHUB_USERNAME}
     ports:
