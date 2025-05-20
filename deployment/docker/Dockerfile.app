@@ -3,14 +3,10 @@ FROM eclipse-temurin:23-jdk AS builder
 
 WORKDIR /app
 
-COPY build.gradle settings.gradle gradlew ./
-COPY gradle ./gradle
+COPY . .
 RUN chmod +x gradlew
 
 RUN ./gradlew dependencies --no-daemon
-
-COPY . .
-
 RUN ./gradlew bootJar --no-daemon
 
 # Build docker image

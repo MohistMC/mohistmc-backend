@@ -57,7 +57,7 @@ tasks.named('test') {
 
 def loadEnv() {
 	def props = new Properties()
-	file(".env").withInputStream {
+	file(".env.dev").withInputStream {
 		props.load(it)
 	}
 	return props
