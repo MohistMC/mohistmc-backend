@@ -105,6 +105,22 @@ public class GitHubArtifactService {
             String neoForgeVersion = loaderVersionParserService.parseNeoForgeVersion(build);
             String fabricVersion = loaderVersionParserService.parseFabricVersion(build);
 
+            if (forgeVersion != null) {
+                forgeVersion = forgeVersion.trim().isEmpty() ? null : forgeVersion;
+            }
+
+            if (neoForgeVersion != null) {
+                neoForgeVersion = neoForgeVersion.trim().isEmpty() ? null : neoForgeVersion;
+            }
+
+            if (fabricVersion != null) {
+                fabricVersion = fabricVersion.trim().isEmpty() ? null : fabricVersion;
+            }
+
+            if (forgeVersion == null && neoForgeVersion == null && fabricVersion == null) {
+                return build;
+            }
+
             return build.setLoaderVersion(new LoaderVersion()
                     .setForgeVersion(forgeVersion)
                     .setNeoforgeVersion(neoForgeVersion)
