@@ -20,7 +20,7 @@ Copy the `.env.dist` file to `.env` and fill in the values.
 
 Run the postgres database (will use credentials from `.env` file):
 ```bash
-$ docker compose up -d
+$ docker compose --env-file .env.dev up -d
 ```
 
 Then, start the app using your IDE.

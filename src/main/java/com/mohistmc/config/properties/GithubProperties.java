@@ -26,8 +26,11 @@ public class GithubProperties {
 
     public GitHub connect() {
         try {
+            if (username == null || token == null || username.trim().isEmpty() || token.trim().isEmpty()) {
+                return connectAnonymously();
+            }
             return GitHub.connect(username, token);
-        } catch (Exception e) {
+        } catch (IOException e) {
             return connectAnonymously();
         }
     }
