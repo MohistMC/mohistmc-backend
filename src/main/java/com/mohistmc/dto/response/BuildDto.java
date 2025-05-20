@@ -10,7 +10,7 @@ import java.time.Instant;
  */
 public record BuildDto(Integer id,
                        @JsonProperty("file_sha256") String fileSha256,
-                       @JsonProperty("built_at") Instant builtOn,
+                       @JsonProperty("build_date") Instant builtOn,
                        @JsonProperty("commit") GitCommitDto gitInfo,
                        @JsonProperty("loader") LoaderVersionDto loaderVersion) implements Serializable {
 }

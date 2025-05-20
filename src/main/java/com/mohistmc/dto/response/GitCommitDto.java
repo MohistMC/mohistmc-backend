@@ -11,5 +11,5 @@ import java.time.Instant;
 public record GitCommitDto(@JsonProperty("hash") String gitSha,
                            @JsonProperty("changelog") String gitCommitMessage,
                            @JsonProperty("author") String gitCommitAuthor,
-                           @JsonProperty("commited_at") Instant gitCommitDate) implements Serializable {
+                           @JsonProperty("commit_date") Instant gitCommitDate) implements Serializable {
 }
