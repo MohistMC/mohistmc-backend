@@ -25,6 +25,7 @@ services:
     environment:
       DB_HOST: mohistmc-db-v3-${ENV}
       DB_NAME: mohistmc_website
+      DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       GITHUB_TOKEN: ${CREDENTIALS_GITHUB_TOKEN}
       GITHUB_USERNAME: ${CREDENTIALS_GITHUB_USERNAME}
