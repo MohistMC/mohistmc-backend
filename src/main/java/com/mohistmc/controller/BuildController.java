@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -47,23 +48,25 @@ public class BuildController {
     @GetMapping("/builds/{buildId}/download")
     public ResponseEntity<Resource> downloadBuild(@PathVariable String projectName,
                                                   @PathVariable String versionName,
-                                                  @PathVariable Integer buildId) {
+                                                  @PathVariable Integer buildId) throws IOException {
         Build build = buildService.getBuildById(buildId);
         Resource buildFile = buildService.getBuildFileStream(build);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + build.getFileName() + "\"")
+                .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(buildFile.contentLength()))
                 .body(buildFile);
     }
 
     @GetMapping("/builds/latest/download")
     public ResponseEntity<Resource> downloadLatestBuild(@PathVariable String projectName,
-                                                        @PathVariable String versionName) {
+                                                        @PathVariable String versionName) throws IOException {
         Build latestBuild = buildService.getLatestBuild(projectName, versionName);
         Resource buildFile = buildService.getBuildFileStream(latestBuild);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + latestBuild.getFileName() + "\"")
+                .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(buildFile.contentLength()))
                 .body(buildFile);
     }
 }
