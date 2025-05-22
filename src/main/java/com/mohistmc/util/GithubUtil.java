@@ -24,13 +24,7 @@ public class GithubUtil {
 
         artifact.download((InputStreamFunction<Void>) inputStream -> {
             log.info("Downloading artifact {} to {}", artifact.getId(), filePath);
-            try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
-                byte[] buffer = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    fos.write(buffer, 0, bytesRead);
-                }
-            }
+            ZipUtil.unzipFirstEntry(inputStream, filePath);
             return null;
         });
     }

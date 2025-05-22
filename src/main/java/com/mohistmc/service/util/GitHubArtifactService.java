@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,23 +81,22 @@ public class GitHubArtifactService {
     }
 
     private void downloadPreviouslyFailedDownloads(GHRepository repository) {
-        List<Build> builds = buildRepository.findAllByArtifactDownloadedIsFalseAndActiveIsTrue();
-
-        for (Build build : builds) {
-            try {
-                GHArtifact artifact = repository.getArtifact(build.getArtifactId());
-                if (artifact == null) {
-                    log.warn("Artifact {} not found for build {}", build.getArtifactId(), build.getId());
-                    builds.remove(build);
-                    continue;
-                }
-                build.setGhArtifact(artifact);
-            } catch (IOException ignored) {
-                builds.remove(build);
-                buildRepository.delete(build);
-            }
-        }
-        builds.forEach(this::downloadArtifactAndSaveHash);
+        buildRepository.findAllByArtifactDownloadedIsFalseAndActiveIsTrue().stream()
+                .map(build -> {
+                    try {
+                        GHArtifact artifact = repository.getArtifact(build.getArtifactId());
+                        if (artifact == null) {
+                            log.warn("Artifact {} not found for build {}", build.getArtifactId(), build.getId());
+                            return null;
+                        }
+                        build.setGhArtifact(artifact);
+                        return build;
+                    } catch (IOException ignored) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .forEach(this::downloadArtifactAndSaveHash);
     }
 
     private void searchForLoaderVersionToUpdate(Project project) {
