@@ -14,11 +14,19 @@ public class BuildSyncCron {
     private static final int TEN_MINUTES = 10 * 60 * 1000;
     private final GitHubArtifactService githubArtifactService;
 
+    private boolean isSynchronizing = false;
+
     @Async("asyncTaskExecutor")
     @Scheduled(fixedRate = TEN_MINUTES)
     public void synchronizeBuilds() {
+        if (isSynchronizing) {
+            log.info("Build synchronization is already in progress.");
+            return;
+        }
+        isSynchronizing = true;
         log.info("Synchronizing builds...");
         githubArtifactService.synchronize();
         log.info("Build synchronization completed.");
+        isSynchronizing = false;
     }
 }

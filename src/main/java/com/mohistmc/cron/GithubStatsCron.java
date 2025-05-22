@@ -14,11 +14,19 @@ public class GithubStatsCron {
     private static final int MINUTES_30 = 30 * 60 * 1000;
     private final GithubStatsService githubStatsService;
 
+    private boolean isSynchronizing = false;
+
     @Async("asyncTaskExecutor")
     @Scheduled(fixedRate = MINUTES_30)
     public void synchronizeBuilds() {
+        if (isSynchronizing) {
+            log.info("Github stats synchronization is already in progress.");
+            return;
+        }
+        isSynchronizing = true;
         log.info("Synchronizing github stats...");
         githubStatsService.synchronize();
         log.info("Github stats synchronization completed.");
+        isSynchronizing = false;
     }
 }
