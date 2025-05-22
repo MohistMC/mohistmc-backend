@@ -32,6 +32,7 @@ public class BuildController {
                                                      @PathVariable String versionName) {
         return buildService.getBuildsByProjectAndVersion(projectName, versionName)
                 .stream()
+                .sorted((b1, b2) -> b2.getBuiltOn().compareTo(b1.getBuiltOn()))
                 .map(buildMapper::toDto)
                 .toList();
     }
