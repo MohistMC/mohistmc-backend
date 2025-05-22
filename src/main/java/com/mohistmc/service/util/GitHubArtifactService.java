@@ -89,6 +89,10 @@ public class GitHubArtifactService {
                             log.warn("Artifact {} not found for build {}", build.getArtifactId(), build.getId());
                             return null;
                         }
+                        if(artifact.isExpired()) {
+                            buildRepository.delete(build);
+                            return null;
+                        }
                         build.setGhArtifact(artifact);
                         return build;
                     } catch (IOException ignored) {
