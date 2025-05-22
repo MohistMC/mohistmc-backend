@@ -1,6 +1,6 @@
 package com.mohistmc.controller;
 
-import com.mohistmc.dto.response.ProjectDto;
+import com.mohistmc.dto.response.ProjectResponseDto;
 import com.mohistmc.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +16,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping("/list")
-    public List<ProjectDto> getProjects() {
+    public List<ProjectResponseDto> getProjects() {
         return projectService.getProjects();
     }
 }

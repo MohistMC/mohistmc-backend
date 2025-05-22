@@ -1,6 +1,6 @@
 package com.mohistmc.controller;
 
-import com.mohistmc.dto.response.ProjectVersionDto;
+import com.mohistmc.dto.response.ProjectVersionResponseDto;
 import com.mohistmc.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +17,7 @@ public class ProjectVersionController {
     private final ProjectService projectService;
 
     @GetMapping("/versions")
-    public List<ProjectVersionDto> getProjectVersions(@PathVariable String projectName) {
+    public List<ProjectVersionResponseDto> getProjectVersions(@PathVariable String projectName) {
         return projectService.getProjectVersions(projectName);
     }
 }

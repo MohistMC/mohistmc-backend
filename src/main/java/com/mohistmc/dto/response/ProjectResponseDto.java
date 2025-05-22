@@ -8,6 +8,6 @@ import java.util.Set;
 /**
  * DTO for {@link com.mohistmc.entity.Project}
  */
-public record ProjectDto(String name,
-                         @JsonProperty("versions") Set<ProjectVersionDto> projectVersions) implements Serializable {
+public record ProjectResponseDto(String name,
+                                 @JsonProperty("versions") Set<ProjectVersionResponseDto> projectVersions) implements Serializable {
 }

@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "github")
@@ -15,6 +16,9 @@ public class GithubProperties {
 
     @Value("${github.token}")
     private String token;
+
+    @Value("${github.stats-repositories}")
+    private String statsRepositories;
 
     private static GitHub connectAnonymously() {
         try {
@@ -33,5 +37,9 @@ public class GithubProperties {
         } catch (IOException e) {
             return connectAnonymously();
         }
+    }
+
+    public List<String> getStatsRepositories() {
+        return statsRepositories == null || statsRepositories.isEmpty() ? List.of() : List.of(statsRepositories.split(","));
     }
 }
