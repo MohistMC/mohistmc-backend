@@ -1,4 +1,4 @@
-CREATE TABLE build_download_stats
+CREATE TABLE IF NOT EXISTS build_download_stats
 (
     id         integer generated always as identity primary key,
     build_id   INTEGER,

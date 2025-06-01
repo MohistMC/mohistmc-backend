@@ -1,4 +1,4 @@
-create table project
+create table IF NOT EXISTS project
 (
     id               integer generated always as identity
         primary key,
@@ -17,7 +17,7 @@ on table project is 'Project table';
 alter table project
     owner to mohistmc;
 
-CREATE TABLE git_commit
+CREATE TABLE IF NOT EXISTS git_commit
 (
     id                 INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     git_sha            TEXT      NOT NULL,
@@ -37,7 +37,7 @@ ON TABLE git_commit IS 'Git commit information';
 ALTER TABLE git_commit
     OWNER TO mohistmc;
 
-create table project_version
+create table IF NOT EXISTS project_version
 (
     id           integer generated always as identity
         primary key,
@@ -57,7 +57,7 @@ alter table project_version
     owner to mohistmc;
 
 
-create table loader_version
+create table IF NOT EXISTS loader_version
 (
     id               integer generated always as identity
         primary key,
@@ -75,7 +75,7 @@ alter table loader_version
 -- Modification de la table build
 DROP TABLE IF EXISTS build CASCADE;
 
-CREATE TABLE build
+CREATE TABLE IF NOT EXISTS build
 (
     id                  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     project_version_id  INTEGER
