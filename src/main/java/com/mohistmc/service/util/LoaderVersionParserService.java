@@ -95,7 +95,7 @@ public class LoaderVersionParserService {
         String gradleContent = getPageContent(gradleUrl);
 
         if (gradleContent != null) {
-            Pattern pattern = Pattern.compile("loader_version=(\\d+\\.\\d+\\.\\d+)");
+            Pattern pattern = Pattern.compile("^loader_version=(\\d+\\.\\d+\\.\\d+)", Pattern.MULTILINE);
             Matcher matcher = pattern.matcher(gradleContent);
             if (matcher.find()) {
                 return matcher.group(1);
