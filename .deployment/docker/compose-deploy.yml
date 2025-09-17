@@ -1,29 +1,27 @@
 services:
   db:
-    image: mohistmc-db-v3-${ENV}:${VERSION}
+    image: mohistmc-db-v3
     build:
       context: ../..
       dockerfile: Dockerfile.db
-    container_name: mohistmc-db-v3-${ENV}
     restart: always
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "${DB_EXTERNAL_PORT}:5432"
     volumes:
-      - mohistmc-v3-${ENV}-postgres-data:/var/lib/postgresql/data
+      - mohistmc-v3-postgres-data:/var/lib/postgresql/data
     networks:
-      - mohistmc-network-v3-${ENV}
+      - mohistmc-network-v3
 
   app:
-    image: mohistmc-backend-v3-${ENV}:${VERSION}
+    image: mohistmc-backend-v3
     build:
       context: ../..
       dockerfile: Dockerfile.app
-    container_name: mohistmc-backend-v3-${ENV}
     restart: always
     environment:
-      DB_HOST: mohistmc-db-v3-${ENV}
+      DB_HOST: mohistmc-db-v3
       DB_NAME: mohistmc_website
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -35,12 +33,12 @@ services:
     volumes:
       - /var/mohistmc:/var/mohistmc
     networks:
-      - mohistmc-network-v3-${ENV}
+      - mohistmc-network-v3
 
 volumes:
-  mohistmc-v3-${ENV}-postgres-data:
+  mohistmc-v3-postgres-data:
 
 networks:
-  mohistmc-network-v3-${ENV}:
+  mohistmc-network-v3:
     driver: bridge
     external: true
