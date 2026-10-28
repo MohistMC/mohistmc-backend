@@ -20,7 +20,10 @@ jobs:
       - name: Build
         run: dockflow build production
         env:
-          DOCKFLOW_SECRETS: ${{ toJSON(secrets) }}
+          PRODUCTION_CONNECTION: ${{ secrets.PRODUCTION_CONNECTION }}
+          PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+          PRODUCTION_GITHUB_TOKEN: ${{ secrets.PRODUCTION_GITHUB_TOKEN }}
+          PRODUCTION_GITHUB_USERNAME: ${{ secrets.PRODUCTION_GITHUB_USERNAME }}
 
   deploy:
     if: github.event_name == 'push' && github.ref_type == 'tag'
@@ -33,7 +36,10 @@ jobs:
       - name: Deploy
         run: dockflow deploy --wait-lock 10m
         env:
-          DOCKFLOW_SECRETS: ${{ toJSON(secrets) }}
+          PRODUCTION_CONNECTION: ${{ secrets.PRODUCTION_CONNECTION }}
+          PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+          PRODUCTION_GITHUB_TOKEN: ${{ secrets.PRODUCTION_GITHUB_TOKEN }}
+          PRODUCTION_GITHUB_USERNAME: ${{ secrets.PRODUCTION_GITHUB_USERNAME }}
 
   backup:
     if: github.event_name != 'push'
@@ -45,4 +51,7 @@ jobs:
       - name: Back up
         run: dockflow backup run production --wait-lock 10m
         env:
-          DOCKFLOW_SECRETS: ${{ toJSON(secrets) }}
+          PRODUCTION_CONNECTION: ${{ secrets.PRODUCTION_CONNECTION }}
+          PRODUCTION_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+          PRODUCTION_GITHUB_TOKEN: ${{ secrets.PRODUCTION_GITHUB_TOKEN }}
+          PRODUCTION_GITHUB_USERNAME: ${{ secrets.PRODUCTION_GITHUB_USERNAME }}
