@@ -11,7 +11,6 @@ compose: [deploy/compose.yml]
 plugins:
   - use: nginx
     with:
-      domain: [api.mohistmc.com]
       template: deploy/nginx/api.mohistmc.com.conf
       name: api.mohistmc.com.conf
 releases:
