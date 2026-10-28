@@ -1,0 +1,13 @@
+# Deployment with Dockflow v2: https://dockflow.shawiizz.dev
+# Secrets (GitHub Actions secrets, or .env.dockflow locally): PRODUCTION_CONNECTION, PRODUCTION_DB_PASSWORD,
+# PRODUCTION_GITHUB_TOKEN, PRODUCTION_GITHUB_USERNAME.
+# The host's nginx proxies api.mohistmc.com to Dockflow's switch on 127.0.0.1:8080. /var/mohistmc (the builds) is
+# mounted on the host from the build VM over SSHFS: a host's mount, set up outside Dockflow.
+version: 1
+app: mohistmc-backend
+# docker-compose.yml at the root is for local development
+compose: [deploy/compose.yml]
+releases:
+  keep: 3
+environments:
+  production: {}

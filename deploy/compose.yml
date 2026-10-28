@@ -1,0 +1,56 @@
+# The API and its Postgres.
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_NAME: mohistmc_website
+      DB_USERNAME: mohistmc
+      DB_PASSWORD: ${DB_PASSWORD}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_USERNAME: ${GITHUB_USERNAME}
+      SERVER_PORT: "3568"
+    volumes:
+      # the builds, read by BuildSyncCron
+      - /var/mohistmc:/var/mohistmc
+    depends_on:
+      db:
+        condition: service_healthy
+    x-dockflow:
+      routes:
+        - domains: [api.mohistmc.com]
+          port: 3568
+      health:
+        http:
+          path: /health
+
+  db:
+    image: postgres:17
+    restart: always
+    command: [postgres, -c, log_connections=on, -c, log_disconnections=on]
+    environment:
+      POSTGRES_DB: mohistmc_website
+      POSTGRES_USER: mohistmc
+      # only used when the data directory is empty
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mohistmc -d mohistmc_website"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    x-dockflow:
+      stateful: true
+      # dockflow backup run, every night from the CI
+      backup:
+        type: postgres
+
+volumes:
+  # the database's existing volume, kept from the previous deployment
+  data:
+    external: true
+    name: mohistmc-backend-production-accessories_mohistmc-postgres-data
