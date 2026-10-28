@@ -7,6 +7,13 @@ version: 1
 app: mohistmc-backend
 # docker-compose.yml at the root is for local development
 compose: [deploy/compose.yml]
+# the vhost of the host's nginx, from deploy/nginx/api.mohistmc.com.conf: checked and reloaded when it changes
+plugins:
+  - use: nginx
+    with:
+      domain: [api.mohistmc.com]
+      template: deploy/nginx/api.mohistmc.com.conf
+      name: api.mohistmc.com.conf
 releases:
   keep: 3
 environments:
