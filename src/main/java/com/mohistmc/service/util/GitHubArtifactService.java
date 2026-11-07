@@ -1,6 +1,5 @@
 package com.mohistmc.service.util;
 
-import com.mohistmc.config.properties.FolderProperties;
 import com.mohistmc.config.properties.GithubProperties;
 import com.mohistmc.dto.WorkflowRunWithArtifacts;
 import com.mohistmc.entity.GitCommit;
@@ -9,6 +8,7 @@ import com.mohistmc.enums.GitPlatformEnum;
 import com.mohistmc.repository.BuildRepository;
 import com.mohistmc.repository.GitCommitRepository;
 import com.mohistmc.repository.ProjectRepository;
+import com.mohistmc.service.BuildStorageService;
 import com.mohistmc.util.FileUtil;
 import com.mohistmc.util.GithubUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,7 @@ import org.kohsuke.github.*;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
@@ -33,8 +34,9 @@ public class GitHubArtifactService {
 
     private final LoaderVersionParserService loaderVersionParserService;
 
+    private final BuildStorageService buildStorageService;
+
     private final GithubProperties githubProperties;
-    private final FolderProperties folderProperties;
 
     public void synchronize() {
         GitHub githubConnection = githubProperties.connect();
@@ -137,18 +139,30 @@ public class GitHubArtifactService {
     private void downloadArtifactAndSaveHash(Build build) {
         buildRepository.save(build);
 
+        Path tempFile = null;
         try {
-            Path buildPath = folderProperties.getBuildPath(build);
-            GithubUtil.downloadArtifact(build.getGhArtifact(), buildPath);
-            String sha256 = FileUtil.getFileSha256(buildPath);
-            build.setFileSha256(sha256);
+            tempFile = Files.createTempFile("build-" + build.getId() + "-", ".jar");
+            GithubUtil.downloadArtifact(build.getGhArtifact(), tempFile);
+            build.setFileSha256(FileUtil.getFileSha256(tempFile));
+            buildStorageService.store(build, tempFile);
             build.setArtifactDownloaded(true);
         } catch (IOException e) {
             log.error("Error downloading artifact {}: {}", build.getGhArtifact(), e.getMessage(), e);
+        } finally {
+            deleteQuietly(tempFile);
         }
 
         log.info("Saving build {} (id {})", build.getGitInfo().getGitSha(), build.getId());
         buildRepository.save(build);
+    }
+
+    private static void deleteQuietly(Path file) {
+        if (file == null) return;
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            log.warn("Could not delete temporary file {}: {}", file, e.getMessage());
+        }
     }
 
     private List<GHWorkflowRun> getGhWorkflowRuns(Project project, ProjectVersion version, GHRepository repo) {

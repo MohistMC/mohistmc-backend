@@ -55,6 +55,10 @@ public class Build {
     @Column(name = "artifact_downloaded")
     private Boolean artifactDownloaded = false;
 
+    // the build's object in the S3 bucket; null while the file is still in builds.path
+    @Column(name = "file_key", length = Integer.MAX_VALUE)
+    private String fileKey;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "git_info")

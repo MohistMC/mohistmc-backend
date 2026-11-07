@@ -1,6 +1,5 @@
 package com.mohistmc.service;
 
-import com.mohistmc.config.properties.FolderProperties;
 import com.mohistmc.entity.Build;
 import com.mohistmc.repository.BuildRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ import java.util.List;
 public class BuildService {
     private final BuildRepository buildRepository;
 
-    private final FolderProperties folderProperties;
+    private final BuildStorageService buildStorageService;
 
     public List<Build> getBuildsByProjectAndVersion(String projectName, String versionName) {
         return buildRepository.findAllByProjectAndVersion(projectName, versionName);
@@ -40,7 +39,7 @@ public class BuildService {
     }
 
     public Resource getBuildFileStream(Build build) {
-        Path buildPath = folderProperties.getBuildPath(build);
+        Path buildPath = buildStorageService.getLocalPath(build);
         Resource resource = new FileSystemResource(buildPath);
 
         if (!resource.isReadable()) {

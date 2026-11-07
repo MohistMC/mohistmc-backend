@@ -1,0 +1,1 @@
+ALTER TABLE build ADD COLUMN file_key TEXT;

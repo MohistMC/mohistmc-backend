@@ -5,11 +5,13 @@ import com.mohistmc.entity.Build;
 import com.mohistmc.mapper.BuildMapper;
 import com.mohistmc.service.BuildDownloadStatsService;
 import com.mohistmc.service.BuildService;
+import com.mohistmc.service.BuildStorageService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,13 +20,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/project/{projectName}/{versionName}")
 @RequiredArgsConstructor
 public class BuildController {
     private final BuildService buildService;
+    private final BuildStorageService buildStorageService;
     private final BuildDownloadStatsService buildDownloadStatsService;
 
     private final BuildMapper buildMapper;
@@ -68,6 +73,12 @@ public class BuildController {
     }
 
     private ResponseEntity<Resource> downloadResponse(Build build, HttpServletRequest request) throws IOException {
+        Optional<URI> publicUrl = buildStorageService.getPublicUrl(build);
+        if (publicUrl.isPresent()) {
+            buildDownloadStatsService.saveBuildDownload(build, request);
+            return ResponseEntity.status(HttpStatus.FOUND).location(publicUrl.get()).build();
+        }
+
         Resource buildFile = buildService.getBuildFileStream(build);
 
         buildDownloadStatsService.saveBuildDownload(build, request);

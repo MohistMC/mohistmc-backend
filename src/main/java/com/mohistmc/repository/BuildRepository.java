@@ -13,7 +13,12 @@ public interface BuildRepository extends JpaRepository<Build, Integer> {
     @Query("SELECT b.workflowRunId FROM Build b WHERE b.projectVersion.id = ?1")
     List<Long> findAllWorkflowRunsIds(Integer projectVersionId);
 
+    // the storage key is made of the project and version names, read outside of any transaction
+    @EntityGraph(attributePaths = {"projectVersion", "projectVersion.project", "gitInfo"})
     List<Build> findAllByArtifactDownloadedIsFalseAndActiveIsTrue();
+
+    @EntityGraph(attributePaths = {"projectVersion", "projectVersion.project", "gitInfo"})
+    List<Build> findAllByArtifactDownloadedIsTrueAndFileKeyIsNullOrderById();
 
     @EntityGraph(attributePaths = {"projectVersion", "projectVersion.project", "loaderVersion", "gitInfo"})
     Optional<Build> findWithDetailsById(Integer id);
