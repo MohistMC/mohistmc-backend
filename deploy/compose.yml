@@ -21,7 +21,7 @@ services:
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       S3_PUBLIC_URL: https://mohistmc.com/builds-raw
       S3_MIGRATE_LOCAL_BUILDS: "true"
-      S3_DELETE_MIGRATED_FILES: "false"
+      S3_DELETE_MIGRATED_FILES: "true"
     volumes:
       # the builds not yet moved to the bucket
       - /var/mohistmc:/var/mohistmc
