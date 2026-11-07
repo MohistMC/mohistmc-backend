@@ -15,6 +15,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -115,6 +116,8 @@ public class BuildStorageService {
             s3.putObject(PutObjectRequest.builder()
                             .bucket(s3Properties.getBucket())
                             .key(key)
+                            // downloads are redirected to the public URL: the object must be readable by anyone
+                            .acl(ObjectCannedACL.PUBLIC_READ)
                             .contentType("application/java-archive")
                             .contentDisposition("attachment; filename=\"" + build.getFileName() + "\"")
                             // the bucket refuses the object if it did not receive exactly this file
