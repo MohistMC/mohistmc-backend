@@ -50,6 +50,21 @@ public class BuildStorageMigrationCron extends AbstractSyncCron {
             if (migrate(build)) migrated++;
         }
         log.info("{} builds moved to the bucket", migrated);
+
+        // the files of builds moved while s3.delete-migrated-files was off
+        if (s3Properties.isDeleteMigratedFiles()) {
+            buildRepository.findAllByFileKeyIsNotNull().forEach(this::deleteLocalFile);
+        }
+    }
+
+    private void deleteLocalFile(Build build) {
+        try {
+            if (Files.deleteIfExists(buildStorageService.getLocalPath(build))) {
+                log.info("Deleted the local file of build {}, now in the bucket", build.getId());
+            }
+        } catch (IOException e) {
+            log.warn("Could not delete the local file of build {}: {}", build.getId(), e.getMessage());
+        }
     }
 
     private boolean migrate(Build build) {
