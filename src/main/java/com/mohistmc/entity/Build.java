@@ -59,6 +59,11 @@ public class Build {
     @Column(name = "file_key", length = Integer.MAX_VALUE)
     private String fileKey;
 
+    // how many times the build was found without its file; it is deactivated past builds.max-missing-file-count
+    @ColumnDefault("0")
+    @Column(name = "missing_file_count", nullable = false)
+    private Integer missingFileCount = 0;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "git_info")

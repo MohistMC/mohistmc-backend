@@ -22,6 +22,9 @@ public interface BuildRepository extends JpaRepository<Build, Integer> {
 
     List<Build> findAllByFileKeyIsNotNull();
 
+    @EntityGraph(attributePaths = {"projectVersion", "projectVersion.project", "gitInfo"})
+    List<Build> findAllByArtifactDownloadedIsTrueAndActiveIsTrueOrderById();
+
     @EntityGraph(attributePaths = {"projectVersion", "projectVersion.project", "loaderVersion", "gitInfo"})
     Optional<Build> findWithDetailsById(Integer id);
 

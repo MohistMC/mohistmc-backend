@@ -17,13 +17,16 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -65,6 +68,16 @@ public class BuildStorageService {
                 .build();
     }
 
+    /**
+     * Whether a build's file is where its row says it is.
+     */
+    public enum FileState {
+        PRESENT,
+        MISSING,
+        // the storage did not answer: nothing can be concluded
+        UNKNOWN
+    }
+
     public boolean usesS3() {
         return s3 != null;
     }
@@ -91,6 +104,35 @@ public class BuildStorageService {
      */
     public void migrateToS3(Build build) throws IOException {
         upload(build, getLocalPath(build));
+    }
+
+    /**
+     * Looks for a build's file: its object in the bucket when file_key is set, its file in builds.path otherwise.
+     */
+    public FileState checkFile(Build build) {
+        if (build.getFileKey() != null) {
+            if (!usesS3()) {
+                return FileState.UNKNOWN;
+            }
+            try {
+                s3.headObject(request -> request.bucket(s3Properties.getBucket()).key(build.getFileKey()));
+                return FileState.PRESENT;
+            } catch (S3Exception e) {
+                return e.statusCode() == 404 ? FileState.MISSING : FileState.UNKNOWN;
+            } catch (SdkException e) {
+                return FileState.UNKNOWN;
+            }
+        }
+
+        try {
+            BasicFileAttributes attributes = Files.readAttributes(getLocalPath(build), BasicFileAttributes.class);
+            return attributes.isRegularFile() && attributes.size() > 0 ? FileState.PRESENT : FileState.MISSING;
+        } catch (NoSuchFileException e) {
+            return FileState.MISSING;
+        } catch (IOException e) {
+            // an I/O error, such as an unreachable mount, says nothing about the file
+            return FileState.UNKNOWN;
+        }
     }
 
     /**
