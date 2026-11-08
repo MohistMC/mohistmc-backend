@@ -57,7 +57,7 @@ public class GitHubArtifactService {
         if (repo == null) return;
 
         log.info("Downloading previously failed artifacts downloads for project: {}", project.getName());
-        downloadPreviouslyFailedDownloads(repo);
+        downloadPreviouslyFailedDownloads(project, repo);
 
         log.info("Searching for project loaders version to update: {}", project.getName());
         searchForLoaderVersionToUpdate(project);
@@ -82,27 +82,36 @@ public class GitHubArtifactService {
         builds.forEach(this::downloadArtifactAndSaveHash);
     }
 
-    private void downloadPreviouslyFailedDownloads(GHRepository repository) {
+    private void downloadPreviouslyFailedDownloads(Project project, GHRepository repository) {
         buildRepository.findAllByArtifactDownloadedIsFalseAndActiveIsTrue().stream()
+                // the artifact of another project's build is not in this repository
+                .filter(build -> build.getProjectVersion().getProject().getId().equals(project.getId()))
                 .map(build -> {
                     try {
                         GHArtifact artifact = repository.getArtifact(build.getArtifactId());
-                        if (artifact == null) {
-                            log.warn("Artifact {} not found for build {}", build.getArtifactId(), build.getId());
-                            return null;
-                        }
-                        if(artifact.isExpired()) {
-                            buildRepository.delete(build);
+                        if (artifact == null || artifact.isExpired()) {
+                            deactivate(build, "its artifact " + build.getArtifactId() + " expired on GitHub");
                             return null;
                         }
                         build.setGhArtifact(artifact);
                         return build;
-                    } catch (IOException ignored) {
+                    } catch (GHFileNotFoundException e) {
+                        deactivate(build, "its artifact " + build.getArtifactId() + " no longer exists on GitHub");
+                        return null;
+                    } catch (IOException e) {
+                        log.warn("Could not read artifact {} of build {}: {}", build.getArtifactId(), build.getId(), e.getMessage());
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
                 .forEach(this::downloadArtifactAndSaveHash);
+    }
+
+    // the build cannot be downloaded any more; it is kept, with its download stats, but no longer listed
+    private void deactivate(Build build, String reason) {
+        build.setActive(false);
+        buildRepository.save(build);
+        log.warn("Build {} deactivated: {}", build.getId(), reason);
     }
 
     private void searchForLoaderVersionToUpdate(Project project) {
