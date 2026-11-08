@@ -18,7 +18,7 @@ Copy the `.env.dist` file to `.env` and fill in the values.
 
 ## Running the project
 
-Run the postgres database (will use credentials from `.env` file):
+Run the postgres database (will use credentials from `.env` file) and S3Mock, which stands in for the builds' bucket:
 ```bash
 $ docker compose --env-file .env.dev up -d
 ```

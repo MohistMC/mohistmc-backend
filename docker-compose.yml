@@ -12,5 +12,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # the builds' bucket, see application-dev.properties
+  s3:
+    image: adobe/s3mock:4.2.0
+    container_name: s3mock
+    restart: always
+    environment:
+      initialBuckets: builds
+    ports:
+      - "9090:9090"
+
 volumes:
   postgres_data:

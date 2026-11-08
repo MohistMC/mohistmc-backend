@@ -1,6 +1,5 @@
 package com.mohistmc.service;
 
-import com.mohistmc.config.properties.FolderProperties;
 import com.mohistmc.config.properties.S3Properties;
 import com.mohistmc.entity.Build;
 import lombok.extern.slf4j.Slf4j;
@@ -23,37 +22,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Optional;
 
 /**
- * Keeps the build files: in the S3 bucket when one is configured, in builds.path otherwise.
- * A build whose file_key is set is served from the bucket, any other from builds.path.
+ * Keeps the build files in the S3 bucket. A build is downloaded from the bucket's public URL.
  */
 @Slf4j
 @Service
 public class BuildStorageService {
-    private final FolderProperties folderProperties;
     private final S3Properties s3Properties;
-
-    // null when no bucket is configured
     private final S3Client s3;
 
-    public BuildStorageService(FolderProperties folderProperties, S3Properties s3Properties) {
-        this.folderProperties = folderProperties;
+    public BuildStorageService(S3Properties s3Properties) {
         this.s3Properties = s3Properties;
-        this.s3 = s3Properties.isEnabled() ? createClient(s3Properties) : null;
+        this.s3 = createClient(s3Properties);
     }
 
     private static S3Client createClient(S3Properties properties) {
-        if (properties.getPublicUrl() == null || properties.getPublicUrl().isBlank()) {
-            throw new IllegalStateException("s3.public-url is required when s3.bucket is set");
+        if (isBlank(properties.getBucket()) || isBlank(properties.getPublicUrl())) {
+            throw new IllegalStateException("s3.bucket and s3.public-url are required: the builds are stored in a bucket");
         }
 
         return S3Client.builder()
@@ -78,65 +69,36 @@ public class BuildStorageService {
         UNKNOWN
     }
 
-    public boolean usesS3() {
-        return s3 != null;
-    }
-
-    public Path getLocalPath(Build build) {
-        return folderProperties.getBuildPath(build);
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     /**
-     * Stores a freshly downloaded build file, which this call consumes.
+     * Uploads a freshly downloaded build file and records its key on the build.
      */
     public void store(Build build, Path file) throws IOException {
-        if (usesS3()) {
-            upload(build, file);
-        } else {
-            Path destination = getLocalPath(build);
-            Files.createDirectories(destination.getParent());
-            Files.move(file, destination, StandardCopyOption.REPLACE_EXISTING);
-        }
+        upload(build, file);
     }
 
     /**
-     * Copies a build's file from builds.path to the bucket. The local file is kept.
-     */
-    public void migrateToS3(Build build) throws IOException {
-        upload(build, getLocalPath(build));
-    }
-
-    /**
-     * Looks for a build's file: its object in the bucket when file_key is set, its file in builds.path otherwise.
+     * Looks for a build's object in the bucket.
      */
     public FileState checkFile(Build build) {
-        if (build.getFileKey() != null) {
-            if (!usesS3()) {
-                return FileState.UNKNOWN;
-            }
-            try {
-                s3.headObject(request -> request.bucket(s3Properties.getBucket()).key(build.getFileKey()));
-                return FileState.PRESENT;
-            } catch (S3Exception e) {
-                return e.statusCode() == 404 ? FileState.MISSING : FileState.UNKNOWN;
-            } catch (SdkException e) {
-                return FileState.UNKNOWN;
-            }
-        }
-
-        try {
-            BasicFileAttributes attributes = Files.readAttributes(getLocalPath(build), BasicFileAttributes.class);
-            return attributes.isRegularFile() && attributes.size() > 0 ? FileState.PRESENT : FileState.MISSING;
-        } catch (NoSuchFileException e) {
+        if (build.getFileKey() == null) {
             return FileState.MISSING;
-        } catch (IOException e) {
-            // an I/O error, such as an unreachable mount, says nothing about the file
+        }
+        try {
+            s3.headObject(request -> request.bucket(s3Properties.getBucket()).key(build.getFileKey()));
+            return FileState.PRESENT;
+        } catch (S3Exception e) {
+            return e.statusCode() == 404 ? FileState.MISSING : FileState.UNKNOWN;
+        } catch (SdkException e) {
             return FileState.UNKNOWN;
         }
     }
 
     /**
-     * Where the build is downloaded from, when it is in the bucket.
+     * Where the build is downloaded from: empty when it is not in the bucket.
      */
     public Optional<URI> getPublicUrl(Build build) {
         if (build.getFileKey() == null) {

@@ -33,14 +33,4 @@ public class S3Properties {
 
     @Value("${s3.public-url}")
     private String publicUrl;
-
-    @Value("${s3.migrate-local-builds}")
-    private boolean migrateLocalBuilds;
-
-    @Value("${s3.delete-migrated-files}")
-    private boolean deleteMigratedFiles;
-
-    public boolean isEnabled() {
-        return bucket != null && !bucket.isBlank();
-    }
 }

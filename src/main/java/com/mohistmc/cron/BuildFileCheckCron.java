@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Checks that every build marked as downloaded still has its file, in the bucket or in builds.path.
- * A build without its file is marked as not downloaded, so that the build synchronization downloads
+ * Checks that every build marked as downloaded still has its object in the bucket.
+ * A build without it is marked as not downloaded, so that the build synchronization downloads
  * it again from GitHub; one found builds.max-missing-file-count times without it is deactivated.
  */
 @Slf4j
@@ -61,7 +61,7 @@ public class BuildFileCheckCron extends AbstractSyncCron {
         log.info("{} builds checked: {} without their file, {} the storage did not answer for",
                 builds.size(), missing.size(), unknown);
 
-        // an unmounted builds.path or a wrong bucket makes every file look missing: that is not a loss
+        // a wrong bucket or prefix makes every file look missing: that is not a loss
         if (missing.size() > MASS_LOSS_THRESHOLD && missing.size() * 2 > builds.size()) {
             log.error("{} of {} builds look like they lost their file: the storage is likely unavailable, nothing changed",
                     missing.size(), builds.size());
@@ -72,7 +72,7 @@ public class BuildFileCheckCron extends AbstractSyncCron {
     }
 
     private void markMissing(Integer id) {
-        // read again: the build may have moved to the bucket since the check
+        // read again: the build may have been downloaded again since the check
         Build build = buildRepository.findWithDetailsById(id).orElse(null);
         if (build == null || !Boolean.TRUE.equals(build.getArtifactDownloaded())
                 || buildStorageService.checkFile(build) != FileState.MISSING) {

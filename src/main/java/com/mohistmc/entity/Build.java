@@ -55,7 +55,7 @@ public class Build {
     @Column(name = "artifact_downloaded")
     private Boolean artifactDownloaded = false;
 
-    // the build's object in the S3 bucket; null while the file is still in builds.path
+    // the build's object in the S3 bucket; null until the build is downloaded
     @Column(name = "file_key", length = Integer.MAX_VALUE)
     private String fileKey;
 
