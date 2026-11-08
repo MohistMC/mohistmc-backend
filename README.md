@@ -14,13 +14,17 @@ This is the rest api for MohistMC's website.
 
 Clone the repository and open it in your favorite IDE (IntelliJ IDEA is recommended).       
 
-Copy the `.env.dist` file to `.env` and fill in the values.
+The development settings are in `.env.dev`, read by the `dev` profile. Fill in `GITHUB_USERNAME` and `GITHUB_TOKEN`
+to synchronize the builds from GitHub: a classic token without any scope is enough, the repositories are public.
 
 ## Running the project
 
-Run the postgres database (will use credentials from `.env` file) and S3Mock, which stands in for the builds' bucket:
+Run the postgres database (will use credentials from `.env.dev`) and S3Mock, which stands in for the builds' bucket:
 ```bash
 $ docker compose --env-file .env.dev up -d
 ```
 
-Then, start the app using your IDE.
+Then, start the app with the `dev` profile, from your IDE or with Gradle:
+```bash
+$ ./gradlew bootRun --args='--spring.profiles.active=dev'
+```
